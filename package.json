@@ -1,0 +1,18 @@
+{
+  "name": "quantumwork-backend",
+  "version": "1.0.0",
+  "description": "Backend for Quantum Work - Global Remote Jobs Platform",
+  "main": "api/server.js",
+  "scripts": {
+    "start": "node api/server.js",
+    "dev": "node --watch api/server.js"
+  },
+  "keywords": ["jobs", "remote", "api", "sqlite"],
+  "author": "Quantum Work",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6"
+  }
+}

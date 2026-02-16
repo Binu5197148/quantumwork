@@ -777,26 +777,52 @@
     </footer>
     
     <script>
+        const API_URL = '';
+        
         // Form submission
-        document.getElementById('candidateForm').addEventListener('submit', function(e) {
+        document.getElementById('candidateForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
+            const submitBtn = this.querySelector('.btn-submit');
             
-            // Store in localStorage for now (will be replaced with backend)
-            let candidates = JSON.parse(localStorage.getItem('quantum_candidates') || '[]');
-            candidates.push({
-                ...data,
-                id: Date.now(),
-                created_at: new Date().toISOString()
-            });
-            localStorage.setItem('quantum_candidates', JSON.stringify(candidates));
+            // Show loading state
+            submitBtn.textContent = 'Creating Profile...';
+            submitBtn.disabled = true;
             
-            alert('🎉 Profile created successfully!\n\nYou will start receiving job matches via email soon.\n\nWelcome to Quantum Work!');
-            
-            // Reset form
-            this.reset();
+            try {
+                const response = await fetch(`${API_URL}/api/candidates`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('🎉 Profile created successfully!\n\nYou will start receiving job matches via email soon.\n\nWelcome to Quantum Work!');
+                    this.reset();
+                } else if (response.status === 409) {
+                    alert('⚠️ This email is already registered. Please use a different email or check your inbox for previous matches.');
+                } else {
+                    alert('❌ Error: ' + (result.error || 'Something went wrong. Please try again.'));
+                }
+            } catch (err) {
+                // Fallback to localStorage if server is not available
+                let candidates = JSON.parse(localStorage.getItem('quantum_candidates') || '[]');
+                candidates.push({
+                    ...data,
+                    id: Date.now(),
+                    created_at: new Date().toISOString()
+                });
+                localStorage.setItem('quantum_candidates', JSON.stringify(candidates));
+                alert('🎉 Profile saved locally!\n\n(Note: Server connection failed, but your data is saved and will be synced when connection is restored.)');
+                this.reset();
+            } finally {
+                submitBtn.textContent = 'Create Profile & Start Matching →';
+                submitBtn.disabled = false;
+            }
         });
         
         // Smooth scroll
